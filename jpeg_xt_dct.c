@@ -211,3 +211,170 @@ void LiftingDCT_TransformBlock(const T *source,T *target)
   }
 }
 ///
+
+/// LiftingDCT::InverseTransformBlock
+// Run the inverse DCT on an 8x8 block reconstructing the data.
+
+void LiftingDCT_InverseTransformBlock(const T *source, T *target)                                                                 
+{
+    T t;
+    T *dp;
+    T *dpend = target + (8 << 3);
+    for(dp = target;dp < dpend;dp += 8, source += 8) {
+      // Inverse output permutation.
+      T z20 =  source[0];
+      T zc0 =  source[1];
+      T z21 =  source[2];
+      T  z1 = -source[3];
+      T z10 = -source[4];
+      T x45 =  source[5];
+      T z11 = -source[6];
+      T zc2 =  source[7];
+      // rotation by 45 degrees of x45,x46 to zc1,zc3.
+      T z0  = x45 - pmul_tan4(z1);
+      T zc3 = z1  + pmul_sin4(z0);
+      T zc1 = z0  - pmul_tan4(zc3);
+      // Next rotation pair.
+      T z00 = z20 - pmul_tan4(z10);
+      T z01 = z21 - pmul_tan2(z11);
+      T zb1 = z10 + pmul_sin4(z00);
+      T zb3 = z11 + pmul_sin2(z01);
+      T zb0 = z00 - pmul_tan4(zb1);
+      T zb2 = z01 - pmul_tan2(zb3);
+      // Small butterfly. 
+      zc1      = -zc1;
+      zc0     -= pmul_tan4(zc1);
+      z21      = zc1 + pmul_sin4(zc0);
+      z20      = zc0 - pmul_tan4(z21);
+      zc2      = -zc2;
+      zc3     -= pmul_tan4(zc2);
+      z10      = zc2 + pmul_sin4(zc3);
+      z11      = zc3 - pmul_tan4(z10);
+      // Rotation by 3Pi/16 and 1Pi/16.
+      z00      = z20 - pmul_tan1(z10);
+      z01      = z21 - pmul_tan3(z11);
+      T x7  = z10 + pmul_sin1(z00);
+      T x6  = z11 + pmul_sin3(z01);
+      T x4  = z00 - pmul_tan1(x7);
+      T x5  = z01 - pmul_tan3(x6);
+      // Small butterfly again to compute x0,x1,x2,x3, again only inverted up to a scale factor of 2.
+      zb2      = -zb2;
+      zb0     -= pmul_tan4(zb2);
+      T x3  = zb2 + pmul_sin4(zb0);
+      T x0  = zb0 - pmul_tan4(x3);
+
+      zb3      = -zb3;
+      zb1     -= pmul_tan4(zb3);
+      T x2  = zb3 + pmul_sin4(zb1);
+      T x1  = zb1 - pmul_tan4(x2);
+      // Finally, the output bufferfly.
+      x4       = -x4;
+      x0      -= pmul_tan4(x4);
+      x4      += pmul_sin4(x0);
+      x0      -= pmul_tan4(x4);
+      dp[0]    = x0;
+      dp[7]    = x4;
+
+      x5       = -x5;
+      x1      -= pmul_tan4(x5);
+      x5      += pmul_sin4(x1);
+      x1      -= pmul_tan4(x5);
+      dp[1]    = x1;
+      dp[6]    = x5;
+
+      x6       = -x6;
+      x2      -= pmul_tan4(x6);
+      x6      += pmul_sin4(x2);
+      x2      -= pmul_tan4(x6);
+      dp[2]    = x2;
+      dp[5]    = x6;
+
+      x7       = -x7;
+      x3      -= pmul_tan4(x7);
+      x7      += pmul_sin4(x3);
+      x3      -= pmul_tan4(x7);
+      dp[3]    = x3;
+      dp[4]    = x7;
+      //
+    }
+    //
+    // Finally, loop over the columns
+    dpend = target + 8;
+    for(dp = target;dp < dpend;dp++) {
+      // Inverse output permutation.
+      T z20    =  dp[0 << 3];
+      T zc0    =  dp[1 << 3];
+      T z21    =  dp[2 << 3];
+      T z1     = -dp[3 << 3];
+      T z10    = -dp[4 << 3];
+      T x45    =  dp[5 << 3];
+      T z11    = -dp[6 << 3];
+      T zc2    =  dp[7 << 3];
+      // rotation by 45 degrees of x45,x46 to zc1,zc3.
+      T z0     = x45 - pmul_tan4(z1);
+      T zc3    = z1  + pmul_sin4(z0);
+      T zc1    = z0  - pmul_tan4(zc3);
+      // Next rotation pair.
+      T z00    = z20 - pmul_tan4(z10);
+      T z01    = z21 - pmul_tan2(z11);
+      T zb1    = z10 + pmul_sin4(z00);
+      T zb3    = z11 + pmul_sin2(z01);
+      T zb0    = z00 - pmul_tan4(zb1);
+      T zb2    = z01 - pmul_tan2(zb3);
+      // Small butterfly. This is not exactly inverted, but inverted up to a scale factor of 2.
+      zc1      = -zc1;
+      zc0     -= pmul_tan4(zc1);
+      z21      = zc1 + pmul_sin4(zc0);
+      z20      = zc0 - pmul_tan4(z21);
+      zc2      = -zc2;
+      zc3     -= pmul_tan4(zc2);
+      z10      = zc2 + pmul_sin4(zc3);
+      z11      = zc3 - pmul_tan4(z10);
+      // Rotation by 3Pi/16 and 1Pi/16.
+      z00      = z20 - pmul_tan1(z10);
+      z01      = z21 - pmul_tan3(z11);
+      T x7     = z10 + pmul_sin1(z00);
+      T x6     = z11 + pmul_sin3(z01);
+      T x4     = z00 - pmul_tan1(x7);
+      T x5     = z01 - pmul_tan3(x6);
+      // Small butterfly again to compute x0,x1,x2,x3, again only inverted up to a scale factor of 2.
+      zb2      = -zb2;
+      zb0     -= pmul_tan4(zb2);
+      T x3     = zb2 + pmul_sin4(zb0);
+      T x0     = zb0 - pmul_tan4(x3);
+
+      zb3      = -zb3;
+      zb1     -= pmul_tan4(zb3);
+      T x2     = zb3 + pmul_sin4(zb1);
+      T x1     = zb1 - pmul_tan4(x2);
+      // Finally, the output bufferfly.
+      x4       = -x4;
+      x0      -= pmul_tan4(x4);
+      x4      += pmul_sin4(x0);
+      x0      -= pmul_tan4(x4);
+      dp[0 << 3] = x0 << preshift;
+      dp[7 << 3] = x4 << preshift;
+
+      x5       = -x5;
+      x1      -= pmul_tan4(x5);
+      x5      += pmul_sin4(x1);
+      x1      -= pmul_tan4(x5);
+      dp[1 << 3] = x1 << preshift;
+      dp[6 << 3] = x5 << preshift;
+
+      x6       = -x6;
+      x2      -= pmul_tan4(x6);
+      x6      += pmul_sin4(x2);
+      x2      -= pmul_tan4(x6);
+      dp[2 << 3] = x2 << preshift;
+      dp[5 << 3] = x6 << preshift;
+
+      x7       = -x7;
+      x3      -= pmul_tan4(x7);
+      x7      += pmul_sin4(x3);
+      x3      -= pmul_tan4(x7);
+      dp[3 << 3] = x3 << preshift;
+      dp[4 << 3] = x7 << preshift;
+    }
+}
+///
