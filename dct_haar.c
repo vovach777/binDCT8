@@ -41,17 +41,17 @@ static void DCT(const int * dataptr, int * outptr ) {
 
 static void IDCT(const int * dataptr, int * outptr) {
    int tmp0, tmp1, tmp2, tmp3, tmp4, tmp5, tmp6, tmp7;
-   tmp4 =  (dataptr[0] / 2) - dataptr[4];
-   tmp0 =  dataptr[0] - tmp4;
+   tmp4 =  (dataptr[0*8] / 2) - dataptr[4*8];
+   tmp0 =  dataptr[0*8] - tmp4;
 
-   tmp2 = dataptr[2] - (dataptr[6]*3/8);
-   tmp6 = dataptr[6] + (tmp2*3/8);
+   tmp2 = dataptr[2*8] - (dataptr[6*8]*3/8);
+   tmp6 = dataptr[6*8] + (tmp2*3/8);
 
-   tmp3 += (dataptr[5] / 2);
-   tmp5 = dataptr[5] - (tmp3*7/8);
+   tmp3 = dataptr[3*8] + (dataptr[5*8] / 2);
+   tmp5 = dataptr[5*8] - (tmp3*7/8);
 
-   tmp1 = dataptr[1];
-   tmp7 = dataptr[7];
+   tmp1 = dataptr[1*8];
+   tmp7 = dataptr[7*8];
 
    //0-4-6-2print_matrix_type(matrix,"%d",8,1)
    tmp6 = (tmp4 / 2) - tmp6;
@@ -72,17 +72,17 @@ static void IDCT(const int * dataptr, int * outptr) {
    tmp5 = (tmp3*5/8) - tmp5;
    tmp3 = tmp3 - (tmp5*3/8);
    //join
-   outptr[3*8] = tmp2 = tmp2 + (tmp7 / 2);
-   outptr[4*8] = tmp2 - tmp7;
+   outptr[3] = tmp2 = tmp2 + (tmp7 / 2);
+   outptr[4] = tmp2 - tmp7;
 
-   outptr[2*8] = tmp6 = tmp6 + (tmp5 / 2);
-   outptr[5*8] = tmp6 - tmp5;
+   outptr[2] = tmp6 = tmp6 + (tmp5 / 2);
+   outptr[5] = tmp6 - tmp5;
 
-   outptr[1*8] = tmp4 = tmp4 + (tmp3 / 2);
-   outptr[6*8] = tmp4 - tmp3;
+   outptr[1] = tmp4 = tmp4 + (tmp3 / 2);
+   outptr[6] = tmp4 - tmp3;
 
-   outptr[0*8] = tmp0 = tmp0 + (tmp1 / 2);
-   outptr[7*8] = tmp0 - tmp1;
+   outptr[0] = tmp0 = tmp0 + (tmp1 / 2);
+   outptr[7] = tmp0 - tmp1;
 }
 
 
