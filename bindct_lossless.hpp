@@ -3,7 +3,6 @@
 #include <cmath>
 #include <vector>
 
-
 #ifndef THE_MATRIX_DEFINED
 using the_matrix_type = int;
 using the_matrix = std::vector<std::vector<the_matrix_type>>;
@@ -127,7 +126,8 @@ void inv_DCT_bin(T &a0, T &a1, T &a2, T &a3, T &a4, T &a5, T &a6, T &a7) {
   a4 = tmp11;
 }
 
-static void DCT_bin(the_matrix &a) {
+void DCT_bin(the_matrix &a) {
+
   auto height = a.size() + 7 & ~7;
   if (height == 0)
     return;
@@ -135,8 +135,8 @@ static void DCT_bin(the_matrix &a) {
   if (width == 0)
     return;
 
-  for (int y = (a.resize(height), 0); y < height; y += 1)
-    for (int x = (a[y].resize(width), 0); x < width; x += 8) {
+  for (int y = (a.resize(height, a.back()), 0); y < height; y += 1)
+    for (int x = (a[y].resize(width, a[y].back()), 0); x < width; x += 8) {
       DCT_bin(a[y][x], a[y][x + 1], a[y][x + 2], a[y][x + 3], a[y][x + 4],
               a[y][x + 5], a[y][x + 6], a[y][x + 7]);
     }
